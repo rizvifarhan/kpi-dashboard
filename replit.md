@@ -7,6 +7,7 @@ This is a real-time business KPI dashboard built with Streamlit that monitors ke
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Technical depth: Comprehensive technical explanations for interview preparation.
 
 ## System Architecture
 
