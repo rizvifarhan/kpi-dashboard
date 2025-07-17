@@ -64,17 +64,24 @@ class Database:
         try:
             # Store each row of data
             for _, row in data.iterrows():
+                # Convert date to string if it's a timestamp
+                date_value = row.get('date', datetime.now().date())
+                if hasattr(date_value, 'strftime'):
+                    date_value = date_value.strftime('%Y-%m-%d')
+                elif hasattr(date_value, 'date'):
+                    date_value = date_value.date().strftime('%Y-%m-%d')
+                
                 cursor.execute('''
                     INSERT INTO kpi_data 
                     (date, revenue, cogs, profit, profit_margin, growth_rate, raw_data)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    row.get('date', datetime.now().date()),
-                    row.get('revenue', 0),
-                    row.get('cogs', 0),
-                    kpis.get('profit', 0),
-                    kpis.get('profit_margin', 0),
-                    kpis.get('growth_rate', 0),
+                    date_value,
+                    float(row.get('revenue', 0)),
+                    float(row.get('cogs', 0)),
+                    float(kpis.get('profit', 0)),
+                    float(kpis.get('profit_margin', 0)),
+                    float(kpis.get('growth_rate', 0)),
                     json.dumps(row.to_dict(), default=str)
                 ))
             
