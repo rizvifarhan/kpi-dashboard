@@ -17,6 +17,9 @@ class Visualizer:
     
     def create_time_series_chart(self, data):
         """Create time series chart for KPI trends"""
+        if data.empty:
+            return go.Figure()
+        
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('Revenue Trend', 'Profit Trend', 'Profit Margin', 'Growth Rate'),
@@ -24,17 +27,21 @@ class Visualizer:
                    [{"secondary_y": False}, {"secondary_y": False}]]
         )
         
+        # Handle x-axis data properly
         if 'timestamp' in data.columns:
-            x_axis = pd.to_datetime(data['timestamp'])
+            x_axis = pd.to_datetime(data['timestamp']).dt.strftime('%Y-%m-%d')
+        elif 'date' in data.columns:
+            x_axis = pd.to_datetime(data['date']).dt.strftime('%Y-%m-%d')
         else:
-            x_axis = data.index
+            x_axis = list(range(len(data)))
         
         # Revenue trend
         if 'revenue' in data.columns:
+            revenue_data = pd.to_numeric(data['revenue'], errors='coerce').fillna(0)
             fig.add_trace(
                 go.Scatter(
                     x=x_axis,
-                    y=data['revenue'],
+                    y=revenue_data,
                     mode='lines+markers',
                     name='Revenue',
                     line=dict(color=self.color_scheme['primary'])
@@ -44,10 +51,11 @@ class Visualizer:
         
         # Profit trend
         if 'profit' in data.columns:
+            profit_data = pd.to_numeric(data['profit'], errors='coerce').fillna(0)
             fig.add_trace(
                 go.Scatter(
                     x=x_axis,
-                    y=data['profit'],
+                    y=profit_data,
                     mode='lines+markers',
                     name='Profit',
                     line=dict(color=self.color_scheme['success'])
@@ -57,10 +65,11 @@ class Visualizer:
         
         # Profit margin
         if 'profit_margin' in data.columns:
+            margin_data = pd.to_numeric(data['profit_margin'], errors='coerce').fillna(0)
             fig.add_trace(
                 go.Scatter(
                     x=x_axis,
-                    y=data['profit_margin'],
+                    y=margin_data,
                     mode='lines+markers',
                     name='Profit Margin (%)',
                     line=dict(color=self.color_scheme['secondary'])
@@ -70,10 +79,11 @@ class Visualizer:
         
         # Growth rate
         if 'growth_rate' in data.columns:
+            growth_data = pd.to_numeric(data['growth_rate'], errors='coerce').fillna(0)
             fig.add_trace(
                 go.Scatter(
                     x=x_axis,
-                    y=data['growth_rate'],
+                    y=growth_data,
                     mode='lines+markers',
                     name='Growth Rate (%)',
                     line=dict(color=self.color_scheme['info'])
@@ -91,24 +101,36 @@ class Visualizer:
     
     def create_comparison_chart(self, kpis, thresholds):
         """Create comparison chart of current KPIs vs thresholds"""
+        if not kpis:
+            return go.Figure()
+        
         kpi_names = []
         current_values = []
         threshold_values = []
         colors = []
         
         for kpi_name, current_value in kpis.items():
-            if kpi_name in thresholds:
-                kpi_names.append(kpi_name.replace('_', ' ').title())
-                current_values.append(current_value)
-                threshold_values.append(thresholds[kpi_name])
-                
-                # Color based on performance
-                if current_value >= thresholds[kpi_name]:
-                    colors.append(self.color_scheme['success'])
-                elif current_value >= thresholds[kpi_name] * 0.9:
-                    colors.append(self.color_scheme['warning'])
-                else:
-                    colors.append(self.color_scheme['warning'])
+            if kpi_name in thresholds and isinstance(current_value, (int, float)):
+                try:
+                    numeric_value = float(current_value)
+                    threshold_value = float(thresholds[kpi_name])
+                    
+                    kpi_names.append(kpi_name.replace('_', ' ').title())
+                    current_values.append(numeric_value)
+                    threshold_values.append(threshold_value)
+                    
+                    # Color based on performance
+                    if numeric_value >= threshold_value:
+                        colors.append(self.color_scheme['success'])
+                    elif numeric_value >= threshold_value * 0.9:
+                        colors.append(self.color_scheme['warning'])
+                    else:
+                        colors.append(self.color_scheme['warning'])
+                except (ValueError, TypeError):
+                    continue
+        
+        if not kpi_names:
+            return go.Figure()
         
         fig = go.Figure()
         
@@ -144,6 +166,9 @@ class Visualizer:
     
     def create_distribution_chart(self, data):
         """Create distribution chart for KPI values"""
+        if data.empty:
+            return go.Figure()
+        
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('Revenue Distribution', 'Profit Distribution', 
@@ -154,51 +179,59 @@ class Visualizer:
         
         # Revenue distribution
         if 'revenue' in data.columns:
-            fig.add_trace(
-                go.Histogram(
-                    x=data['revenue'],
-                    name='Revenue',
-                    nbinsx=20,
-                    marker_color=self.color_scheme['primary']
-                ),
-                row=1, col=1
-            )
+            revenue_data = pd.to_numeric(data['revenue'], errors='coerce').dropna()
+            if not revenue_data.empty:
+                fig.add_trace(
+                    go.Histogram(
+                        x=revenue_data,
+                        name='Revenue',
+                        nbinsx=20,
+                        marker_color=self.color_scheme['primary']
+                    ),
+                    row=1, col=1
+                )
         
         # Profit distribution
         if 'profit' in data.columns:
-            fig.add_trace(
-                go.Histogram(
-                    x=data['profit'],
-                    name='Profit',
-                    nbinsx=20,
-                    marker_color=self.color_scheme['success']
-                ),
-                row=1, col=2
-            )
+            profit_data = pd.to_numeric(data['profit'], errors='coerce').dropna()
+            if not profit_data.empty:
+                fig.add_trace(
+                    go.Histogram(
+                        x=profit_data,
+                        name='Profit',
+                        nbinsx=20,
+                        marker_color=self.color_scheme['success']
+                    ),
+                    row=1, col=2
+                )
         
         # COGS distribution
         if 'cogs' in data.columns:
-            fig.add_trace(
-                go.Histogram(
-                    x=data['cogs'],
-                    name='COGS',
-                    nbinsx=20,
-                    marker_color=self.color_scheme['warning']
-                ),
-                row=2, col=1
-            )
+            cogs_data = pd.to_numeric(data['cogs'], errors='coerce').dropna()
+            if not cogs_data.empty:
+                fig.add_trace(
+                    go.Histogram(
+                        x=cogs_data,
+                        name='COGS',
+                        nbinsx=20,
+                        marker_color=self.color_scheme['warning']
+                    ),
+                    row=2, col=1
+                )
         
         # Profit margin distribution
         if 'profit_margin' in data.columns:
-            fig.add_trace(
-                go.Histogram(
-                    x=data['profit_margin'],
-                    name='Profit Margin',
-                    nbinsx=20,
-                    marker_color=self.color_scheme['secondary']
-                ),
-                row=2, col=2
-            )
+            margin_data = pd.to_numeric(data['profit_margin'], errors='coerce').dropna()
+            if not margin_data.empty:
+                fig.add_trace(
+                    go.Histogram(
+                        x=margin_data,
+                        name='Profit Margin',
+                        nbinsx=20,
+                        marker_color=self.color_scheme['secondary']
+                    ),
+                    row=2, col=2
+                )
         
         fig.update_layout(
             title="KPI Distributions",

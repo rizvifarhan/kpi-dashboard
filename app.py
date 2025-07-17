@@ -264,16 +264,36 @@ def display_dashboard():
         tab1, tab2, tab3 = st.tabs(["Time Series", "Comparison", "Distribution"])
         
         with tab1:
-            fig_time = st.session_state.visualizer.create_time_series_chart(historical_data)
-            st.plotly_chart(fig_time, use_container_width=True)
+            try:
+                fig_time = st.session_state.visualizer.create_time_series_chart(historical_data)
+                if fig_time.data:
+                    st.plotly_chart(fig_time, use_container_width=True)
+                else:
+                    st.info("No time series data available")
+            except Exception as e:
+                st.error(f"Error creating time series chart: {str(e)}")
         
         with tab2:
-            fig_comparison = st.session_state.visualizer.create_comparison_chart(kpis, thresholds)
-            st.plotly_chart(fig_comparison, use_container_width=True)
+            try:
+                fig_comparison = st.session_state.visualizer.create_comparison_chart(numeric_kpis, thresholds)
+                if fig_comparison.data:
+                    st.plotly_chart(fig_comparison, use_container_width=True)
+                else:
+                    st.info("No comparison data available")
+            except Exception as e:
+                st.error(f"Error creating comparison chart: {str(e)}")
         
         with tab3:
-            fig_dist = st.session_state.visualizer.create_distribution_chart(historical_data)
-            st.plotly_chart(fig_dist, use_container_width=True)
+            try:
+                fig_dist = st.session_state.visualizer.create_distribution_chart(historical_data)
+                if fig_dist.data:
+                    st.plotly_chart(fig_dist, use_container_width=True)
+                else:
+                    st.info("No distribution data available")
+            except Exception as e:
+                st.error(f"Error creating distribution chart: {str(e)}")
+    else:
+        st.info("No historical data available yet. Data will appear here after processing more files.")
     
     # Data table
     st.subheader("Recent Data")
