@@ -21,20 +21,30 @@ class KPICalculator:
         if data.empty:
             return kpis
         
-        # Basic KPIs
-        kpis['revenue'] = self.calculate_revenue(data)
-        kpis['cogs'] = self.calculate_cogs(data)
-        kpis['profit'] = self.calculate_profit(data)
-        kpis['profit_margin'] = self.calculate_profit_margin(data)
-        kpis['growth_rate'] = self.calculate_growth_rate(data)
-        kpis['revenue_per_day'] = self.calculate_revenue_per_day(data)
-        kpis['efficiency_ratio'] = self.calculate_efficiency_ratio(data)
+        # Basic KPIs - ensure all values are numeric
+        kpis['revenue'] = float(self.calculate_revenue(data))
+        kpis['cogs'] = float(self.calculate_cogs(data))
+        kpis['profit'] = float(self.calculate_profit(data))
+        kpis['profit_margin'] = float(self.calculate_profit_margin(data))
+        kpis['growth_rate'] = float(self.calculate_growth_rate(data))
+        kpis['revenue_per_day'] = float(self.calculate_revenue_per_day(data))
+        kpis['efficiency_ratio'] = float(self.calculate_efficiency_ratio(data))
         
         # Trend analysis
-        kpis.update(self.calculate_trends(data))
+        trends = self.calculate_trends(data)
+        for key, value in trends.items():
+            if isinstance(value, (int, float)):
+                kpis[key] = float(value)
+            else:
+                kpis[key] = value  # Keep string values like 'increasing', 'decreasing'
         
         # Performance metrics
-        kpis.update(self.calculate_performance_metrics(data))
+        metrics = self.calculate_performance_metrics(data)
+        for key, value in metrics.items():
+            if isinstance(value, (int, float)) and not pd.isna(value):
+                kpis[key] = float(value)
+            else:
+                kpis[key] = 0.0  # Default to 0 for NaN values
         
         return kpis
     

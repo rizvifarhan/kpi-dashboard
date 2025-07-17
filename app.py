@@ -175,45 +175,83 @@ def display_dashboard():
     
     with col1:
         if 'revenue' in kpis:
-            st.metric("Revenue", f"${kpis['revenue']:,.2f}", delta=f"{kpis.get('revenue_change', 0):.1f}%")
+            try:
+                revenue_val = float(kpis['revenue'])
+                revenue_change = float(kpis.get('revenue_change', 0))
+                st.metric("Revenue", f"${revenue_val:,.2f}", delta=f"{revenue_change:.1f}%")
+            except (ValueError, TypeError):
+                st.metric("Revenue", f"${kpis['revenue']}")
     
     with col2:
         if 'profit' in kpis:
-            st.metric("Profit", f"${kpis['profit']:,.2f}", delta=f"{kpis.get('profit_change', 0):.1f}%")
+            try:
+                profit_val = float(kpis['profit'])
+                profit_change = float(kpis.get('profit_change', 0))
+                st.metric("Profit", f"${profit_val:,.2f}", delta=f"{profit_change:.1f}%")
+            except (ValueError, TypeError):
+                st.metric("Profit", f"${kpis['profit']}")
     
     with col3:
         if 'profit_margin' in kpis:
-            st.metric("Profit Margin", f"{kpis['profit_margin']:.1f}%", delta=f"{kpis.get('margin_change', 0):.1f}%")
+            try:
+                margin_val = float(kpis['profit_margin'])
+                margin_change = float(kpis.get('margin_change', 0))
+                st.metric("Profit Margin", f"{margin_val:.1f}%", delta=f"{margin_change:.1f}%")
+            except (ValueError, TypeError):
+                st.metric("Profit Margin", f"{kpis['profit_margin']}%")
     
     with col4:
         if 'growth_rate' in kpis:
-            st.metric("Growth Rate", f"{kpis['growth_rate']:.1f}%")
+            try:
+                growth_val = float(kpis['growth_rate'])
+                st.metric("Growth Rate", f"{growth_val:.1f}%")
+            except (ValueError, TypeError):
+                st.metric("Growth Rate", f"{kpis['growth_rate']}%")
     
     # Threshold configuration
     st.subheader("Threshold Configuration")
     
-    threshold_cols = st.columns(len(kpis))
-    thresholds = st.session_state.database.get_thresholds()
+    # Only show numeric KPIs for threshold configuration
+    numeric_kpis = {k: v for k, v in kpis.items() if isinstance(v, (int, float))}
     
-    for i, (kpi_name, kpi_value) in enumerate(kpis.items()):
-        with threshold_cols[i % len(threshold_cols)]:
-            current_threshold = thresholds.get(kpi_name, kpi_value * 0.8)
-            new_threshold = st.number_input(
-                f"{kpi_name.replace('_', ' ').title()} Threshold",
-                value=float(current_threshold),
-                key=f"threshold_{kpi_name}"
-            )
-            
-            # Color coding based on threshold
-            if kpi_value < new_threshold:
-                st.error(f"⚠️ Below threshold!")
-            elif kpi_value < new_threshold * 1.1:
-                st.warning(f"⚡ Approaching threshold")
-            else:
-                st.success(f"✅ Above threshold")
-            
-            # Update threshold in database
-            st.session_state.database.update_threshold(kpi_name, new_threshold)
+    if numeric_kpis:
+        threshold_cols = st.columns(len(numeric_kpis))
+        thresholds = st.session_state.database.get_thresholds()
+        
+        for i, (kpi_name, kpi_value) in enumerate(numeric_kpis.items()):
+            with threshold_cols[i % len(threshold_cols)]:
+                # Ensure kpi_value is numeric
+                try:
+                    numeric_value = float(kpi_value) if isinstance(kpi_value, (int, float, str)) else 0
+                except (ValueError, TypeError):
+                    numeric_value = 0
+                
+                # Get or set default threshold
+                default_threshold = max(numeric_value * 0.8, 0) if numeric_value > 0 else 100
+                current_threshold = thresholds.get(kpi_name, default_threshold)
+                
+                new_threshold = st.number_input(
+                    f"{kpi_name.replace('_', ' ').title()} Threshold",
+                    value=float(current_threshold),
+                    min_value=0.0,
+                    key=f"threshold_{kpi_name}"
+                )
+                
+                # Color coding based on threshold (only for numeric KPIs)
+                if isinstance(numeric_value, (int, float)) and isinstance(new_threshold, (int, float)):
+                    if numeric_value < new_threshold:
+                        st.error(f"⚠️ Below threshold! (Current: {numeric_value:.2f})")
+                    elif numeric_value < new_threshold * 1.1:
+                        st.warning(f"⚡ Approaching threshold (Current: {numeric_value:.2f})")
+                    else:
+                        st.success(f"✅ Above threshold (Current: {numeric_value:.2f})")
+                else:
+                    st.info(f"Current value: {kpi_value}")
+                
+                # Update threshold in database
+                st.session_state.database.update_threshold(kpi_name, new_threshold)
+    else:
+        st.info("No numeric KPIs available for threshold configuration.")
     
     # Visualizations
     st.subheader("Trend Analysis")
