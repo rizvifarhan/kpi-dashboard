@@ -2,30 +2,87 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import streamlit as st
+from llm_data_extractor import LLMDataExtractor
 
 class DataProcessor:
     def __init__(self):
         self.supported_formats = ['.xlsx', '.xls']
+        self.llm_extractor = LLMDataExtractor()
+        self.use_llm = True
     
     def load_excel(self, file_path):
-        """Load and process Excel file"""
+        """Load and process Excel file with LLM enhancement"""
         try:
             # Read Excel file
             df = pd.read_excel(file_path)
             
-            # Basic data cleaning
-            df = self.clean_data(df)
-            
-            # Validate required columns
-            if self.validate_data(df):
-                return df
+            if self.use_llm and df is not None and not df.empty:
+                # Use LLM to extract and standardize data
+                st.info("🤖 Using AI to analyze and extract business data...")
+                standardized_df, analysis = self.llm_extractor.extract_business_data(df)
+                
+                # Store analysis results for display
+                self.last_analysis = analysis
+                
+                # Display analysis results
+                confidence = analysis.get('confidence_score', 0)
+                if confidence > 0.7:
+                    st.success(f"✅ Data analyzed successfully (Confidence: {confidence:.0%})")
+                else:
+                    st.warning(f"⚠️ Data analysis completed with lower confidence ({confidence:.0%})")
+                
+                # Show column mappings
+                mappings = analysis.get('column_mappings', {})
+                if mappings:
+                    st.info("📊 Column mappings identified:")
+                    for standard_name, actual_column in mappings.items():
+                        if actual_column:
+                            st.write(f"• {standard_name.replace('_', ' ').title()}: {actual_column}")
+                
+                if not standardized_df.empty:
+                    return standardized_df
+                else:
+                    st.warning("LLM extraction returned empty data, falling back to traditional processing")
+                    return self.fallback_processing(df)
             else:
-                st.error("Excel file must contain required columns: Date, Revenue, COGS")
-                return None
+                # Traditional processing
+                return self.fallback_processing(df)
                 
         except Exception as e:
             st.error(f"Error loading Excel file: {str(e)}")
             return None
+    
+    def fallback_processing(self, df):
+        """Traditional data processing when LLM fails"""
+        # Basic data cleaning
+        df = self.clean_data(df)
+        
+        # Validate required columns
+        if self.validate_data(df):
+            return df
+        else:
+            st.error("Excel file must contain required columns: Date, Revenue, COGS")
+            return None
+    
+    def get_llm_insights(self, df, kpis):
+        """Get LLM-generated business insights"""
+        if self.use_llm and hasattr(self, 'llm_extractor'):
+            try:
+                return self.llm_extractor.generate_data_insights(df, kpis)
+            except Exception as e:
+                st.error(f"Error generating insights: {str(e)}")
+                return None
+        return None
+    
+    def get_suggested_thresholds(self, df, kpis):
+        """Get LLM-suggested KPI thresholds"""
+        if self.use_llm and hasattr(self, 'llm_extractor'):
+            try:
+                return self.llm_extractor.suggest_kpi_thresholds(df, kpis)
+            except Exception as e:
+                st.error(f"Error suggesting thresholds: {str(e)}")
+                return None
+        return None
     
     def clean_data(self, df):
         """Clean and standardize the data"""

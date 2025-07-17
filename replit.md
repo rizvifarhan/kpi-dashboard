@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a real-time business KPI dashboard built with Streamlit that monitors key performance indicators and provides automated alerts when thresholds are breached. The application processes Excel data files, calculates various business metrics, and visualizes them in an interactive dashboard with real-time file monitoring capabilities.
+This is a real-time business KPI dashboard built with Streamlit that monitors key performance indicators and provides automated alerts when thresholds are breached. The application processes Excel data files using AI-powered data extraction (Qwen3B via OpenRouter), calculates various business metrics, and visualizes them in an interactive dashboard with real-time file monitoring capabilities. The system now includes intelligent data analysis and business insights generation using Large Language Models.
 
 ## User Preferences
 
@@ -63,6 +63,13 @@ The application follows a modular architecture with clear separation of concerns
 - Slack API integration
 - Configurable threshold-based alerting
 
+### 8. LLM Data Extractor (`llm_data_extractor.py`)
+- AI-powered data extraction using Qwen3B model
+- OpenRouter API integration for cost-effective LLM access
+- Intelligent column mapping and data standardization
+- Business insights generation
+- Automated threshold suggestions based on historical data
+
 ## Data Flow
 
 1. **Data Input**: Users upload Excel files through the Streamlit interface
@@ -90,6 +97,11 @@ The application follows a modular architecture with clear separation of concerns
 - **WhatsApp Business API**: Mobile messaging alerts
 - **Slack API**: Team communication alerts
 - **Requests**: HTTP client for API calls
+
+### AI/LLM Integration
+- **OpenRouter API**: Cost-effective access to various AI models
+- **Qwen3B Model**: Efficient language model for data analysis
+- **OpenAI Library**: Compatible client for API interactions
 
 ### System Integration
 - **Threading**: Background file monitoring

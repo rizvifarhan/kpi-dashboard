@@ -82,6 +82,18 @@ def main():
         st.session_state.alert_manager.configure_whatsapp(whatsapp_token, whatsapp_phone)
         st.session_state.alert_manager.configure_slack(slack_token, slack_channel)
         
+        # AI Settings
+        st.subheader("🤖 AI Settings")
+        use_llm = st.checkbox("Enable AI Data Analysis", value=True, help="Use Qwen3B AI to intelligently extract and analyze business data")
+        st.session_state.data_processor.use_llm = use_llm
+        
+        if use_llm:
+            openrouter_key = os.getenv("OPENROUTER_API_KEY")
+            if openrouter_key:
+                st.success("✅ AI Analysis Enabled")
+            else:
+                st.error("❌ OpenRouter API Key Required")
+        
         # Auto-refresh toggle
         auto_refresh = st.checkbox("Auto-refresh (30 seconds)", value=True)
         
@@ -294,6 +306,31 @@ def display_dashboard():
                 st.error(f"Error creating distribution chart: {str(e)}")
     else:
         st.info("No historical data available yet. Data will appear here after processing more files.")
+    
+    # LLM Insights Section
+    st.subheader("🤖 AI-Generated Business Insights")
+    
+    # Get LLM insights
+    insights = st.session_state.data_processor.get_llm_insights(data, kpis)
+    if insights:
+        st.markdown(insights)
+    else:
+        st.info("AI insights will appear here after data processing with LLM enabled.")
+    
+    # Suggested Thresholds
+    suggested_thresholds = st.session_state.data_processor.get_suggested_thresholds(data, kpis)
+    if suggested_thresholds:
+        st.subheader("💡 AI-Suggested Thresholds")
+        st.info("Based on your historical data, here are AI-recommended thresholds:")
+        
+        suggestion_cols = st.columns(3)
+        for i, (threshold_name, threshold_value) in enumerate(suggested_thresholds.items()):
+            with suggestion_cols[i % 3]:
+                st.metric(
+                    threshold_name.replace('_', ' ').title(),
+                    f"{threshold_value:.2f}",
+                    help="AI-suggested threshold based on historical data"
+                )
     
     # Data table
     st.subheader("Recent Data")
