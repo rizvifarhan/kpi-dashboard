@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import threading
 from data_processor import DataProcessor
 from alert_manager import AlertManager
-from database import Database
+from kpi_database import Database
 from file_monitor import FileMonitor
 from kpi_calculator import KPICalculator
 from visualization import Visualizer
