@@ -6,16 +6,25 @@ from typing import Dict, Any, List, Optional
 
 class LLMDataExtractor:
     def __init__(self):
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=os.environ.get("OPENROUTER_API_KEY")
-        )
-        self.model = "qwen/qwen-2.5-3b-instruct"
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if api_key:
+            self.client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key
+            )
+            self.model = "qwen/qwen-2.5-3b-instruct"
+            self.enabled = True
+        else:
+            self.client = None
+            self.enabled = False
     
     def analyze_excel_structure(self, df: pd.DataFrame) -> Dict[str, Any]:
         """
         Use LLM to analyze Excel structure and identify business data columns
         """
+        if not self.enabled or not self.client:
+            return self._fallback_analysis(df)
+        
         # Get first few rows as sample
         sample_data = df.head(10).to_string()
         column_names = list(df.columns)
@@ -111,6 +120,8 @@ class LLMDataExtractor:
         """
         Generate business insights using LLM
         """
+        if not self.enabled or not self.client:
+            return "AI insights are not available. Please configure OpenRouter API key."
         # Create summary of the data
         data_summary = {
             "total_records": len(df),
@@ -159,6 +170,12 @@ class LLMDataExtractor:
         """
         Suggest appropriate KPI thresholds based on historical data
         """
+        if not self.enabled or not self.client:
+            return {
+                "revenue_threshold": kpis.get('total_revenue', 0) * 0.8,
+                "profit_margin_threshold": 10.0,
+                "growth_rate_threshold": 0.0
+            }
         # Calculate basic statistics
         stats = {}
         if 'revenue' in df.columns:
