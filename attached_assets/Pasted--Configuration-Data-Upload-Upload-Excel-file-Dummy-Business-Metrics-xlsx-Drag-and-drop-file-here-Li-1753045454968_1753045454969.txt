@@ -1,0 +1,183 @@
+
+Configuration
+Data Upload
+Upload Excel file
+
+Dummy_Business_Metrics.xlsx
+Drag and drop file here
+Limit 200MB per file • XLSX, XLS
+Dummy_Business_Metrics.xlsx
+6.6KB
+Alert Settings
+WhatsApp Configuration
+
+WhatsApp API Token
+
+
+WhatsApp Phone Number
+
+Slack Configuration
+
+Slack Bot Token
+
+•••••••••••••••••••••••••••••••••••••••••••••••••••••••••
+
+Slack Channel
+
+C096N6AQ09G
+🤖 AI Settings
+
+❌ OpenRouter API Key Required
+
+
+
+Slack Configuration
+
+🤖 AI Settings
+❌ OpenRouter API Key Required
+
+📊 Real-Time Business KPI Dashboard
+Monitor your business metrics and get automated alerts when thresholds are breached.
+
+Key Performance Indicators
+Revenue
+
+$807,077.00
+-11.2%
+Profit
+
+$267,398.00
+0.0%
+Profit Margin
+
+33.1%
+0.0%
+Growth Rate
+
+-1.0%
+Threshold Configuration
+Revenue Threshold
+
+45000.00
+✅ Above threshold (Current: 807077.00)
+
+Cogs Threshold
+
+0.00
+✅ Above threshold (Current: 539679.00)
+
+Profit Threshold
+
+645661.60
+⚠️ Below threshold! (Current: 267398.00)
+
+Profit Margin Threshold
+
+35.00
+⚠️ Below threshold! (Current: 33.13)
+
+Growth Rate Threshold
+
+0.77
+⚠️ Below threshold! (Current: -0.96)
+
+Revenue Per Day Threshold
+
+21522.05
+✅ Above threshold (Current: 26902.57)
+
+Efficiency Ratio Threshold
+
+0.00
+✅ Above threshold (Current: 1.50)
+
+Revenue Change Threshold
+
+8.97
+⚠️ Below threshold! (Current: -11.21)
+
+Revenue Volatility Threshold
+
+10547.43
+✅ Above threshold (Current: 13184.29)
+
+Revenue Max Threshold
+
+100.00
+⚠️ Below threshold! (Current: 0.00)
+
+Revenue Min Threshold
+
+100.00
+⚠️ Below threshold! (Current: 0.00)
+
+Revenue Median Threshold
+
+21767.20
+✅ Above threshold (Current: 27209.00)
+
+Cogs Volatility Threshold
+
+5758.87
+✅ Above threshold (Current: 7198.59)
+
+Avg Cogs Threshold
+
+14391.44
+✅ Above threshold (Current: 17989.30)
+
+Revenue Ma 7 Threshold
+
+18576.46
+✅ Above threshold (Current: 28058.00)
+
+Revenue Ma 14 Threshold
+
+21595.03
+✅ Above threshold (Current: 25172.00)
+
+Revenue Ma 30 Threshold
+
+21522.05
+✅ Above threshold (Current: 26902.57)
+
+Trend Analysis
+
+Time Series
+
+
+Comparison
+
+
+Distribution
+
+🤖 AI-Generated Business Insights
+AI insights are not available. Please configure OpenRouter API key.
+
+💡 AI-Suggested Thresholds
+Based on your historical data, here are AI-recommended thresholds:
+
+Revenue Threshold
+
+0.00
+Profit Margin Threshold
+
+10.00
+Growth Rate Threshold
+
+0.00
+Recent Data
+Export
+
+
+🤖 Using AI to analyze and extract business data...
+
+⚠️ Data analysis completed with lower confidence (50%)
+
+📊 Column mappings identified:
+
+• Date: Date/Time
+
+• Revenue: Revenue
+
+• Cogs: Cost of Goods Sold (COGS)

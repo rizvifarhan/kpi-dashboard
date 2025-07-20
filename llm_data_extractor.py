@@ -75,8 +75,12 @@ class LLMDataExtractor:
                 max_tokens=1000
             )
             
-            result = json.loads(response.choices[0].message.content)
-            return result
+            content = response.choices[0].message.content
+            if content:
+                result = json.loads(content)
+                return result
+            else:
+                return self._fallback_analysis(df)
             
         except Exception as e:
             print(f"LLM analysis error: {e}")
@@ -114,7 +118,7 @@ class LLMDataExtractor:
         # Clean and convert data types
         standardized_df = self._clean_extracted_data(standardized_df)
         
-        return standardized_df, analysis
+        return standardized_df
     
     def generate_data_insights(self, df: pd.DataFrame, kpis: Dict[str, Any]) -> str:
         """
@@ -160,7 +164,8 @@ class LLMDataExtractor:
                 max_tokens=800
             )
             
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            return content if content else "Unable to generate insights at this time."
             
         except Exception as e:
             print(f"Insight generation error: {e}")
@@ -171,10 +176,14 @@ class LLMDataExtractor:
         Suggest appropriate KPI thresholds based on historical data
         """
         if not self.enabled or not self.client:
+            # Provide intelligent fallback thresholds based on actual data
+            revenue = kpis.get('revenue', kpis.get('total_revenue', 0))
+            profit_margin = kpis.get('profit_margin', kpis.get('avg_profit_margin', 0))
+            
             return {
-                "revenue_threshold": kpis.get('total_revenue', 0) * 0.8,
-                "profit_margin_threshold": 10.0,
-                "growth_rate_threshold": 0.0
+                "revenue_threshold": max(revenue * 0.8, 10000) if revenue > 0 else 50000,
+                "profit_margin_threshold": max(profit_margin * 0.9, 15.0) if profit_margin > 0 else 20.0,
+                "growth_rate_threshold": 2.0  # Reasonable default growth target
             }
         # Calculate basic statistics
         stats = {}
@@ -215,15 +224,27 @@ class LLMDataExtractor:
                 max_tokens=300
             )
             
-            result = json.loads(response.choices[0].message.content)
-            return result
+            content = response.choices[0].message.content
+            if content:
+                result = json.loads(content)
+                return result
+            else:
+                return {
+                    "revenue_threshold": kpis.get('total_revenue', 0) * 0.8,
+                    "profit_margin_threshold": 10.0,
+                    "growth_rate_threshold": 0.0
+                }
             
         except Exception as e:
             print(f"Threshold suggestion error: {e}")
+            # Intelligent fallback thresholds
+            revenue = kpis.get('revenue', kpis.get('total_revenue', 0))
+            profit_margin = kpis.get('profit_margin', kpis.get('avg_profit_margin', 0))
+            
             return {
-                "revenue_threshold": kpis.get('total_revenue', 0) * 0.8,
-                "profit_margin_threshold": 10.0,
-                "growth_rate_threshold": 0.0
+                "revenue_threshold": max(revenue * 0.8, 10000) if revenue > 0 else 50000,
+                "profit_margin_threshold": max(profit_margin * 0.9, 15.0) if profit_margin > 0 else 20.0,
+                "growth_rate_threshold": 2.0
             }
     
     def _fallback_analysis(self, df: pd.DataFrame) -> Dict[str, Any]:

@@ -19,7 +19,8 @@ class DataProcessor:
             if self.use_llm and df is not None and not df.empty:
                 # Use LLM to extract and standardize data
                 st.info("🤖 Using AI to analyze and extract business data...")
-                standardized_df, analysis = self.llm_extractor.extract_business_data(df)
+                analysis = self.llm_extractor.analyze_excel_structure(df)
+                standardized_df = self.llm_extractor.extract_business_data(df)
                 
                 # Store analysis results for display
                 self.last_analysis = analysis

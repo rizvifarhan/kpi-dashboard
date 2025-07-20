@@ -89,10 +89,15 @@ def main():
         
         if use_llm:
             openrouter_key = os.getenv("OPENROUTER_API_KEY")
-            if openrouter_key:
+            if openrouter_key and len(openrouter_key) > 10:
                 st.success("✅ AI Analysis Enabled")
+                # Test if LLM is actually working
+                if hasattr(st.session_state.data_processor.llm_extractor, 'enabled'):
+                    if not st.session_state.data_processor.llm_extractor.enabled:
+                        st.warning("⚠️ AI Analysis may not be working properly")
             else:
                 st.error("❌ OpenRouter API Key Required")
+                st.info("Add your OpenRouter API key in the Replit Secrets tab")
         
         # Auto-refresh toggle
         auto_refresh = st.checkbox("Auto-refresh (30 seconds)", value=True)
